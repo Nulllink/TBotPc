@@ -1,12 +1,15 @@
 import re
 import time
-import keyboard
+from pynput.keyboard import Key, Controller
 from aiogram import Bot, Dispatcher, executor, types
+import keymap
 
 f = open("token.txt", "r")
 TOKEN = f.readline()
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+keycodes = keymap.keycodes
+keyboard = Controller()
 
 mode = 'buttons'
 last_msg = 'emp'
@@ -28,7 +31,7 @@ mode_kb.add(*buttons)
 
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(message: types.Message):
-    global mode, last_msg, b_mode, buttons_kb, mode_kb
+    global mode, last_msg, b_mode, buttons_kb, mode_kb, keycodes
     m: str = message.text
     m = m.lower()
 
@@ -50,6 +53,7 @@ async def get_text_messages(message: types.Message):
         else:
             if mode == 'key' or b_mode:
                 blocks = m.split(' ')
+                key = keycodes[blocks[0]]
                 if len(blocks) > 1:
                     times = int(blocks[1])
                     while times > 0:
@@ -59,9 +63,8 @@ async def get_text_messages(message: types.Message):
                     await message.reply(f"I pressed: {m} times")
                     print(f"I pressed: {m} times")
                 else:
-                    keyboard.send(m, do_release=False)
-                    time.sleep(0.5)
-                    keyboard.send(m, do_press=False)
+                    keyboard.press('m')
+                    keyboard.release('m')
                     await message.reply(f"I pressed: {m}")
                     print(f"I pressed: {m}")
                 b_mode = False
@@ -75,4 +78,4 @@ async def get_text_messages(message: types.Message):
     last_msg = m
 
 print('Bot started')
-executor.start_polling(dp,skip_updates=True)
+executor.start_polling(dp, skip_updates=True)
