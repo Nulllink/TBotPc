@@ -2,7 +2,6 @@ import re
 import time
 import keyboard
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.utils.exceptions import BotBlocked
 
 f = open("token.txt", "r")
 TOKEN = f.readline()
@@ -12,12 +11,14 @@ dp = Dispatcher(bot)
 mode = 'buttons'
 last_msg = 'emp'
 b_mode = False
+board = None
 
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(message: types.Message):
     global mode
     global last_msg
     global b_mode
+    global board
     m: str = message.text
     m = m.lower()
 
@@ -30,7 +31,7 @@ async def get_text_messages(message: types.Message):
             await message.answer(f"Change mode on", reply_markup=board)
         elif last_msg == 'mode':
             mode = m
-            await message.reply(f"I changed mode to: {m}")
+            await message.reply(f"I changed mode to: {m}", reply_markup=types.ReplyKeyboardRemove())
             print(f"I changed mode to: {m}")
         else:
             if mode == 'key' or b_mode:
@@ -44,7 +45,9 @@ async def get_text_messages(message: types.Message):
                     await message.reply(f"I pressed: {m} times")
                     print(f"I pressed: {m} times")
                 else:
-                    keyboard.send(m)
+                    keyboard.send(m, do_release=False)
+                    time.sleep(0.5)
+                    keyboard.send(m, do_press=False)
                     await message.reply(f"I pressed: {m}")
                     print(f"I pressed: {m}")
                 b_mode = False
@@ -54,9 +57,13 @@ async def get_text_messages(message: types.Message):
                 print(f"I wrote: {m}")
             if mode == 'buttons':
                 board = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                buttons = ["space", "backspace", "delete"]
+                buttons = ["esc", "space", "backspace"]
                 board.row(*buttons)
                 buttons = ["left", "right", "up", "down"]
+                board.row(*buttons)
+                buttons = ["f", "m"]
+                board.row(*buttons)
+                buttons = ["mode", "delete"]
                 board.row(*buttons)
                 await message.answer("Press button", reply_markup=board)
                 b_mode = True
