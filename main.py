@@ -11,28 +11,42 @@ dp = Dispatcher(bot)
 mode = 'buttons'
 last_msg = 'emp'
 b_mode = False
-board = None
+
+buttons_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+buttons = ["esc", "space", "backspace"]
+buttons_kb.row(*buttons)
+buttons = ["left", "right", "up", "down"]
+buttons_kb.row(*buttons)
+buttons = ["f", "m"]
+buttons_kb.row(*buttons)
+buttons = ["mode", "delete", "lang"]
+buttons_kb.row(*buttons)
+
+mode_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+buttons = ["key", "write", "buttons"]
+mode_kb.add(*buttons)
 
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(message: types.Message):
-    global mode
-    global last_msg
-    global b_mode
-    global board
+    global mode, last_msg, b_mode, buttons_kb, mode_kb
     m: str = message.text
     m = m.lower()
 
     rus = re.search('[а-яА-Я]', m)
     if rus is None:
         if m == 'mode':
-            board = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            buttons = ["key", "write", "buttons"]
-            board.add(*buttons)
-            await message.answer(f"Change mode on", reply_markup=board)
+            await message.answer(f"Change mode on", reply_markup=mode_kb)
+        elif m == 'lang':
+            keyboard.send("shift+alt")
+            await message.reply(f"I changed language")
+            print(f"I changed language")
         elif last_msg == 'mode':
             mode = m
             await message.reply(f"I changed mode to: {m}", reply_markup=types.ReplyKeyboardRemove())
             print(f"I changed mode to: {m}")
+            if mode == 'buttons':
+                await message.answer("Press button", reply_markup=buttons_kb)
+                b_mode = True
         else:
             if mode == 'key' or b_mode:
                 blocks = m.split(' ')
@@ -56,16 +70,7 @@ async def get_text_messages(message: types.Message):
                 await message.reply(f"I wrote: {m}")
                 print(f"I wrote: {m}")
             if mode == 'buttons':
-                board = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                buttons = ["esc", "space", "backspace"]
-                board.row(*buttons)
-                buttons = ["left", "right", "up", "down"]
-                board.row(*buttons)
-                buttons = ["f", "m"]
-                board.row(*buttons)
-                buttons = ["mode", "delete"]
-                board.row(*buttons)
-                await message.answer("Press button", reply_markup=board)
+                await message.answer("Press button", reply_markup=buttons_kb)
                 b_mode = True
     last_msg = m
 
