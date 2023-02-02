@@ -13,5 +13,11 @@ keycodes = dict(
     ctrl=Key.ctrl_l,
     windows=Key.cmd_l,
     tab=Key.tab,
-    capslock=Key.caps_lock
+    capslock=Key.caps_lock,
+    volup=Key.media_volume_up,
+    voldown=Key.media_volume_down,
+    mute=Key.media_volume_mute,
+    pause=Key.media_play_pause,
+    next=Key.media_next,
+    prev=Key.media_previous
 )

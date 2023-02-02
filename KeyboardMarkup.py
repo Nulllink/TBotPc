@@ -1,15 +1,25 @@
 from aiogram import types
 
-buttons_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
-buttons = ["esc", "space", "backspace"]
-buttons_kb.row(*buttons)
+movie_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+buttons = ["esc", "space"]
+movie_kb.row(*buttons)
 buttons = ["left", "right", "up", "down"]
-buttons_kb.row(*buttons)
+movie_kb.row(*buttons)
 buttons = ["f", "m"]
-buttons_kb.row(*buttons)
-buttons = ["mode", "delete", "lang"]
-buttons_kb.row(*buttons)
+movie_kb.row(*buttons)
+buttons = ["mode", "lang"]
+movie_kb.row(*buttons)
 
 mode_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
-buttons = ["key", "write", "buttons"]
+buttons = ["key", "write"]
 mode_kb.add(*buttons)
+buttons = ["movie", "media"]
+mode_kb.add(*buttons)
+
+media_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+buttons = ["volup", "voldown", "mute"]
+media_kb.add(*buttons)
+buttons = ["pause", "next", "prev"]
+media_kb.add(*buttons)
+buttons = ["mode"]
+media_kb.add(*buttons)

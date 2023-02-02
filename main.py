@@ -12,9 +12,10 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 controller = Controller()
 
-mode = 'buttons'
+mode = 'movie'
 last_msg = 'emp'
 b_mode = False
+
 
 def controller_send(command):
     keys = command.split('+')
@@ -28,14 +29,23 @@ def controller_send(command):
             if len(key) > 1:
                 key = KeyMap.keycodes[key]
             controller.release(key)
-            print(f"release {key}")
     else:
         if len(keys[0]) > 1:
             keys[0] = KeyMap.keycodes[keys[0]]
         controller.press(keys[0])
-        print(f"press {keys[0]}")
         controller.release(keys[0])
-        print(f"release {keys[0]}")
+        print(f"press {keys[0]}")
+
+
+async def button_control(message: types.Message):
+    global b_mode
+    if mode == 'movie':
+        await message.answer(f"Press {mode} button", reply_markup=KeyboardMarkup.movie_kb)
+        b_mode = True
+    elif mode == 'media':
+        await message.answer(f"Press {mode} button", reply_markup=KeyboardMarkup.media_kb)
+        b_mode = True
+
 
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(message: types.Message):
@@ -53,9 +63,8 @@ async def get_text_messages(message: types.Message):
         elif last_msg == 'mode':
             mode = m
             await message.reply(f"I changed mode to: {m}", reply_markup=types.ReplyKeyboardRemove())
-            if mode == 'buttons':
-                await message.answer("Press button", reply_markup=KeyboardMarkup.buttons_kb)
-                b_mode = True
+            time.sleep(0.3)
+            await button_control(message)
         else:
             if mode == 'key' or b_mode:
                 blocks = m.split(' ')
@@ -65,17 +74,15 @@ async def get_text_messages(message: types.Message):
                         times -= 1
                         controller_send(blocks[0])
                         time.sleep(0.5)
-                    await message.reply(f"I pressed: {m} times")
+                    #await message.reply(f"I pressed: {m} times")
                 else:
                     controller_send(blocks[0])
-                    await message.reply(f"I pressed: {m}")
+                    #await message.reply(f"I pressed: {m}")
                 b_mode = False
             elif mode == 'write':
                 controller.type(m)
-                await message.reply(f"I wrote: {m}")
-            if mode == 'buttons':
-                await message.answer("Press button", reply_markup=KeyboardMarkup.buttons_kb)
-                b_mode = True
+                #await message.reply(f"I wrote: {m}")
+            await button_control(message)
     else:
         await message.answer("I don't support russian at all")
     last_msg = m
