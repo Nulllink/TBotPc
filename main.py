@@ -45,6 +45,9 @@ async def button_control(message: types.Message):
     elif mode == 'media':
         await message.answer(f"Press {mode} button", reply_markup=KeyboardMarkup.media_kb)
         b_mode = True
+    elif mode == 'os':
+        await message.answer(f"Press {mode} button", reply_markup=KeyboardMarkup.os_kb)
+        b_mode = True
 
 
 @dp.message_handler(content_types=['text'])

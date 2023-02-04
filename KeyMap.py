@@ -19,5 +19,7 @@ keycodes = dict(
     mute=Key.media_volume_mute,
     pause=Key.media_play_pause,
     next=Key.media_next,
-    prev=Key.media_previous
+    prev=Key.media_previous,
+    f4=Key.f4,
+    enter=Key.enter
 )
