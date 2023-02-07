@@ -31,3 +31,5 @@ buttons = ["ctrl+a", "ctrl+c", "ctrl+v"]
 os_kb.row(*buttons)
 buttons = ["left", "right", "up", "down"]
 os_kb.row(*buttons)
+buttons = ["mode", "lang"]
+os_kb.row(*buttons)
