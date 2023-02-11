@@ -2,8 +2,10 @@ import re
 import time
 from pynput.keyboard import Controller
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import InputFile
 import KeyboardMarkup
 import KeyMap
+from mss import mss
 
 f = open("token.txt", "r")
 TOKEN = f.readline()
@@ -35,6 +37,7 @@ def controller_send(command, fi=0):
                 if len(key) > 1:
                     key = KeyMap.keycodes[key]
                 controller.press(key)
+                time.sleep(0.3)
                 print(f"press {key}")
             for key in keys:
                 if len(key) > 1:
@@ -67,40 +70,46 @@ async def button_control(message: types.Message):
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(message: types.Message):
     global mode, last_msg, b_mode
-    m: str = message.text
-    m = m.lower()
+    m: str = message.text.lower()
+    msg = m.split(' ')
 
-    rus = re.search('[а-яА-Я]', m)
+    rus = re.search('[а-яА-Я]', msg[0])
     if rus is None:
-        if m == 'mode':
+        if msg[0] == 'mode':
             await message.answer(f"Change mode on", reply_markup=KeyboardMarkup.mode_kb)
-        elif m == 'lang':
+        elif msg[0] == 'lang':
             controller_send("shift+alt")
             await message.reply(f"I changed language")
         elif last_msg == 'mode':
-            mode = m
-            await message.reply(f"I changed mode to: {m}", reply_markup=types.ReplyKeyboardRemove())
+            mode = msg[0]
+            await message.reply(f"I changed mode to: {msg[0]}", reply_markup=types.ReplyKeyboardRemove())
             time.sleep(0.3)
             await button_control(message)
+        elif msg[0] == 'screen':
+            if len(msg) == 1:
+                msg.append('1')
+            with mss() as sct:
+                sct.shot(mon=int(msg[1]), output="screen.png")
+            scr = InputFile("screen.png")
+            await message.answer_document(scr)
         else:
             if mode == 'key' or b_mode:
-                blocks = m.split(' ')
-                if len(blocks) > 1:
-                    times = int(blocks[1])
+                if len(msg) > 1:
+                    times = int(msg[1])
                     while times > 0:
                         times -= 1
-                        controller_send(blocks[0])
+                        controller_send(msg[0])
                         time.sleep(0.5)
                     #await message.reply(f"I pressed: {m} times")
                 else:
-                    if mode == "long" and blocks[0] in KeyboardMarkup.lng and key_on == "none":
-                        await message.reply(f"I pressed: {blocks[0].upper()}")
-                        controller_send(blocks[0], 1)
-                    elif blocks[0] in KeyboardMarkup.lng and key_on != "none":
+                    if mode == "long" and msg[0] in KeyboardMarkup.lng and key_on == "none":
+                        await message.reply(f"I pressed: {msg[0].upper()}")
+                        controller_send(msg[0], 1)
+                    elif msg[0] in KeyboardMarkup.lng and key_on != "none":
                         await message.reply(f"I released: {key_on.upper()}")
-                        controller_send(blocks[0], 2)
+                        controller_send(msg[0], 2)
                     else:
-                        controller_send(blocks[0])
+                        controller_send(msg[0])
                     #await message.reply(f"I pressed: {m}")
                 b_mode = False
             elif mode == 'write':
